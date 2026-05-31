@@ -268,20 +268,13 @@ fun MainAppScreen(viewModel: GuestViewModel) {
             },
             floatingActionButton = {
                 if (currentScreen == AppScreen.Accounts) {
-                    FloatingActionButton(
+                    SmallFloatingActionButton(
                         onClick = { showAddBottomSheet = true },
                         modifier = Modifier.testTag("add_account_fab"),
                         containerColor = MaterialTheme.colorScheme.primary,
                         contentColor = MaterialTheme.colorScheme.onPrimary
                     ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(imageVector = Icons.Default.Add, contentDescription = "Thêm tài khoản")
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Thêm", fontWeight = FontWeight.Bold)
-                        }
+                        Icon(imageVector = Icons.Default.Add, contentDescription = "Thêm tài khoản")
                     }
                 }
             }
@@ -424,74 +417,70 @@ fun AccountsFlowSection(
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         
-        // Dynamic 3-Column Stats Grid matching "Sophisticated Dark" specs
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                .padding(horizontal = 16.dp, vertical = 6.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            // Column 1: Active Accounts
             Card(
                 modifier = Modifier.weight(1f),
                 colors = CardDefaults.cardColors(containerColor = Soph_ActiveBlueBg),
                 border = BorderStroke(1.dp, Soph_ActiveBlueBorder),
                 shape = RoundedCornerShape(16.dp)
             ) {
-                Column(modifier = Modifier.padding(12.dp)) {
+                Column(modifier = Modifier.padding(8.dp)) {
                     Text(
                         text = "CÒN HẠN",
-                        fontSize = 10.sp,
+                        fontSize = 9.sp,
                         fontWeight = FontWeight.Bold,
                         color = Soph_ActiveBlueText,
                         style = TextStyle(letterSpacing = 0.5.sp)
                     )
                     Text(
                         text = stats.tokenActive.toString(),
-                        fontSize = 22.sp,
+                        fontSize = 18.sp,
                         fontWeight = FontWeight.Light,
                         color = Color(0xFFE2E2E6),
-                        modifier = Modifier.padding(top = 4.dp)
+                        modifier = Modifier.padding(top = 2.dp)
                     )
                 }
             }
 
-            // Column 2: Expired Accounts
             Card(
                 modifier = Modifier.weight(1f),
                 colors = CardDefaults.cardColors(containerColor = Soph_ExpiredRedBg),
                 border = BorderStroke(1.dp, Soph_ExpiredRedBorder),
                 shape = RoundedCornerShape(16.dp)
             ) {
-                Column(modifier = Modifier.padding(12.dp)) {
+                Column(modifier = Modifier.padding(8.dp)) {
                     Text(
                         text = "HẾT HẠN",
-                        fontSize = 10.sp,
+                        fontSize = 9.sp,
                         fontWeight = FontWeight.Bold,
                         color = Soph_ExpiredRedText,
                         style = TextStyle(letterSpacing = 0.5.sp)
                     )
                     Text(
                         text = stats.tokenExpired.toString(),
-                        fontSize = 22.sp,
+                        fontSize = 18.sp,
                         fontWeight = FontWeight.Light,
                         color = Color(0xFFE2E2E6),
-                        modifier = Modifier.padding(top = 4.dp)
+                        modifier = Modifier.padding(top = 2.dp)
                     )
                 }
             }
 
-            // Column 3: Added Today
             Card(
                 modifier = Modifier.weight(1f),
                 colors = CardDefaults.cardColors(containerColor = Soph_NormalGreenBg),
                 border = BorderStroke(1.dp, Soph_NormalGreenBorder),
                 shape = RoundedCornerShape(16.dp)
             ) {
-                Column(modifier = Modifier.padding(12.dp)) {
+                Column(modifier = Modifier.padding(8.dp)) {
                     Text(
                         text = "MỚI HÔM NAY",
-                        fontSize = 10.sp,
+                        fontSize = 9.sp,
                         fontWeight = FontWeight.Bold,
                         color = Soph_NormalGreenText,
                         style = TextStyle(letterSpacing = 0.5.sp)
@@ -499,10 +488,10 @@ fun AccountsFlowSection(
                     val prefix = if (stats.createdToday > 0) "+" else ""
                     Text(
                         text = "$prefix${stats.createdToday}",
-                        fontSize = 22.sp,
+                        fontSize = 18.sp,
                         fontWeight = FontWeight.Light,
                         color = Color(0xFFE2E2E6),
-                        modifier = Modifier.padding(top = 4.dp)
+                        modifier = Modifier.padding(top = 2.dp)
                     )
                 }
             }
@@ -534,25 +523,25 @@ fun AccountsFlowSection(
             }
         }
 
-        // Sophisticated Outlined Text Field search bar matching dark mock exactly
         OutlinedTextField(
             value = searchQuery,
             onValueChange = onQueryChange,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 4.dp)
+                .padding(horizontal = 16.dp, vertical = 2.dp)
                 .testTag("search_text_input"),
-            placeholder = { Text("Search UID, Nickname, or Region...", color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)) },
-            leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search", tint = MaterialTheme.colorScheme.onSurfaceVariant) },
+            placeholder = { Text("Search UID, Nickname, or Region...", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)) },
+            leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search", modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant) },
             trailingIcon = {
                 if (searchQuery.isNotEmpty()) {
-                    IconButton(onClick = { onQueryChange("") }) {
-                        Icon(Icons.Default.Clear, contentDescription = "Clear", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    IconButton(onClick = { onQueryChange("") }, modifier = Modifier.size(24.dp)) {
+                        Icon(Icons.Default.Clear, contentDescription = "Clear", modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
             },
             singleLine = true,
-            shape = RoundedCornerShape(16.dp),
+            textStyle = TextStyle(fontSize = 14.sp),
+            shape = RoundedCornerShape(14.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = MaterialTheme.colorScheme.surface,
                 unfocusedContainerColor = MaterialTheme.colorScheme.surface,
@@ -563,35 +552,22 @@ fun AccountsFlowSection(
             )
         )
 
-        // Preset group tabs filters row
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .horizontalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                .padding(horizontal = 16.dp, vertical = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             groupPresets.forEach { group ->
                 val isSelected = group in selectedGroupFilters
                 FilterChip(
                     selected = isSelected,
                     onClick = { onGroupToggle(group) },
-                    label = { Text(group) },
-                    leadingIcon = {
-                        if (isSelected) {
-                            Icon(
-                                imageVector = Icons.Default.Check,
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp)
-                            )
-                        } else {
-                            Icon(
-                                imageVector = Icons.Default.Label,
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp)
-                            )
-                        }
-                    },
+                    label = { Text(group, fontSize = 12.sp) },
+                    leadingIcon = if (isSelected) {
+                        { Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(14.dp)) }
+                    } else null,
                     colors = FilterChipDefaults.filterChipColors(
                         selectedContainerColor = MaterialTheme.colorScheme.primary,
                         selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
@@ -702,9 +678,9 @@ fun GuestAccountListItem(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 6.dp)
+            .padding(horizontal = 16.dp, vertical = 4.dp)
             .testTag("account_item_${account.localId}")
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(14.dp))
             .combinedClickable(
                 onClick = onClick,
                 onLongClick = onLongClick
@@ -713,15 +689,14 @@ fun GuestAccountListItem(
         border = itemBorder,
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
-        Column(modifier = Modifier.padding(14.dp)) {
+        Column(modifier = Modifier.padding(10.dp)) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                // Multi-select Indicator or Avatar
                 Box(
                     modifier = Modifier
-                        .size(46.dp)
+                        .size(36.dp)
                         .clip(CircleShape)
                         .background(
                             if (isSelected) MaterialTheme.colorScheme.primary
@@ -737,7 +712,6 @@ fun GuestAccountListItem(
                             tint = MaterialTheme.colorScheme.onPrimary
                         )
                     } else {
-                        // Letter avatar
                         val initials = if (account.nickname.contains("_") || account.nickname.contains(" ")) {
                             val parts = account.nickname.split("_", " ", "-")
                             (parts.getOrNull(0)?.take(1) ?: "").uppercase() + (parts.getOrNull(1)?.take(1) ?: "").uppercase()
@@ -747,60 +721,58 @@ fun GuestAccountListItem(
                         Text(
                             text = initials,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 15.sp,
+                            fontSize = 13.sp,
                             color = if (account.isExpired()) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                             else Soph_ActiveBlueText
                         )
                     }
                 }
-                Spacer(modifier = Modifier.width(12.dp))
-                
-                // Account Basic Metadata
+                Spacer(modifier = Modifier.width(10.dp))
+
                 Column(modifier = Modifier.weight(1f)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = account.nickname,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 15.sp,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            color = if (account.isExpired()) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                            else MaterialTheme.colorScheme.onSurface
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = "LVL ${account.level}",
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Soph_NormalGreenText,
-                            modifier = Modifier
-                                .background(Soph_NormalGreenBg, RoundedCornerShape(6.dp))
-                                .border(1.dp, Soph_NormalGreenBorder, RoundedCornerShape(6.dp))
-                                .padding(horizontal = 6.dp, vertical = 2.dp)
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = account.nickname,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 15.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        color = if (account.isExpired()) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                        else MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(1.dp))
                     Text(
                         text = "UID: ${account.uid}",
-                        fontSize = 12.sp,
+                        fontSize = 11.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontFamily = FontFamily.Monospace
                     )
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        text = "Khu vực: ${account.region}",
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
-                    )
+                    Spacer(modifier = Modifier.height(1.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "LVL ${account.level}",
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Soph_NormalGreenText,
+                            modifier = Modifier
+                                .background(Soph_NormalGreenBg, RoundedCornerShape(4.dp))
+                                .border(1.dp, Soph_NormalGreenBorder, RoundedCornerShape(4.dp))
+                                .padding(horizontal = 4.dp, vertical = 1.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "Khu vực: ${account.region}",
+                            fontSize = 11.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                        )
+                    }
                 }
 
-                // Expiration constraints state tag
                 Column(horizontalAlignment = Alignment.End) {
                     val statusLabel: String
                     val statusBg: Color
                     val statusBorder: Color
                     val statusTextCol: Color
-                    
+
                     when {
                         account.isExpired() -> {
                             statusLabel = "EXPIRED"
@@ -810,9 +782,9 @@ fun GuestAccountListItem(
                         }
                         account.isNearExpired() -> {
                             statusLabel = "WARNING"
-                            statusBg = Color(0xFF312811)
-                            statusBorder = Color(0xFF54463E)
-                            statusTextCol = Color(0xFFFFF3CD)
+                            statusBg = Color(0xFF312811).copy(alpha = 0.5f)
+                            statusBorder = Color(0xFF54463E).copy(alpha = 0.4f)
+                            statusTextCol = Color(0xFFFFF3CD).copy(alpha = 0.7f)
                         }
                         else -> {
                             statusLabel = "ACTIVE"
@@ -821,43 +793,42 @@ fun GuestAccountListItem(
                             statusTextCol = Soph_NormalGreenText
                         }
                     }
-                    
+
                     Text(
                         text = statusLabel,
-                        fontSize = 9.sp,
+                        fontSize = 8.sp,
                         fontWeight = FontWeight.Bold,
                         color = statusTextCol,
                         modifier = Modifier
-                            .background(statusBg, RoundedCornerShape(6.dp))
-                            .border(1.dp, statusBorder, RoundedCornerShape(6.dp))
-                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                            .background(statusBg, RoundedCornerShape(4.dp))
+                            .border(1.dp, statusBorder, RoundedCornerShape(4.dp))
+                            .padding(horizontal = 4.dp, vertical = 1.dp)
                     )
-                    
-                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Spacer(modifier = Modifier.height(2.dp))
                     IconButton(
                         onClick = { isExpanded = !isExpanded },
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(20.dp)
                     ) {
                         Icon(
                             imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
                             contentDescription = "Expand controls",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(16.dp)
                         )
                     }
                 }
             }
 
-            // Expanded panel with Copy buttons and specific settings
             AnimatedVisibility(
                 visible = isExpanded,
                 enter = expandVertically() + fadeIn(),
                 exit = shrinkVertically() + fadeOut()
             ) {
-                Column(modifier = Modifier.padding(top = 12.dp)) {
+                Column(modifier = Modifier.padding(top = 8.dp)) {
                     Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-                    Spacer(modifier = Modifier.height(8.dp))
-                    
-                    // Display groups chips
+                    Spacer(modifier = Modifier.height(6.dp))
+
                     if (account.groupNames.isNotEmpty()) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -867,9 +838,9 @@ fun GuestAccountListItem(
                                 imageVector = Icons.Default.Folder,
                                 contentDescription = "Nhóm",
                                 tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
-                                modifier = Modifier.size(14.dp)
+                                modifier = Modifier.size(12.dp)
                             )
-                            Spacer(modifier = Modifier.width(6.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
                             Row(
                                 modifier = Modifier.horizontalScroll(rememberScrollState()),
                                 horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -877,75 +848,73 @@ fun GuestAccountListItem(
                                 account.groupNames.forEach { group ->
                                     Text(
                                         text = group,
-                                        fontSize = 10.sp,
+                                        fontSize = 9.sp,
                                         fontWeight = FontWeight.Medium,
                                         color = MaterialTheme.colorScheme.onPrimaryContainer,
                                         modifier = Modifier
-                                            .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f), RoundedCornerShape(4.dp))
-                                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                                            .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f), RoundedCornerShape(3.dp))
+                                            .padding(horizontal = 4.dp, vertical = 1.dp)
                                     )
                                 }
                             }
                         }
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(6.dp))
                     }
 
                     if (account.note.isNotBlank()) {
                         Text(
                             text = "Ghi chú: ${account.note}",
-                            fontSize = 11.sp,
+                            fontSize = 10.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(bottom = 8.dp)
+                            modifier = Modifier.padding(bottom = 6.dp)
                         )
                     }
 
-                    // Tokens control actions line
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         Button(
                             onClick = { copyToClipboard("UID", account.uid) },
-                            shape = RoundedCornerShape(6.dp),
-                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                            shape = RoundedCornerShape(4.dp),
+                            contentPadding = PaddingValues(horizontal = 6.dp, vertical = 0.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
-                            modifier = Modifier.height(30.dp).testTag("copy_uid_${account.localId}")
+                            modifier = Modifier.height(26.dp).testTag("copy_uid_${account.localId}")
                         ) {
-                            Icon(Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.size(12.dp))
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text("Sao chép UID", fontSize = 11.sp)
+                            Icon(Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.size(10.dp))
+                            Spacer(modifier = Modifier.width(3.dp))
+                            Text("Sao chép UID", fontSize = 10.sp)
                         }
 
                         Button(
                             onClick = { copyToClipboard("Access Token", account.accessToken) },
-                            shape = RoundedCornerShape(6.dp),
-                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                            shape = RoundedCornerShape(4.dp),
+                            contentPadding = PaddingValues(horizontal = 6.dp, vertical = 0.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
-                            modifier = Modifier.height(30.dp).testTag("copy_access_${account.localId}")
+                            modifier = Modifier.height(26.dp).testTag("copy_access_${account.localId}")
                         ) {
-                            Icon(Icons.Default.Key, contentDescription = null, modifier = Modifier.size(12.dp))
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text("Access Token", fontSize = 11.sp)
+                            Icon(Icons.Default.Key, contentDescription = null, modifier = Modifier.size(10.dp))
+                            Spacer(modifier = Modifier.width(3.dp))
+                            Text("Access Token", fontSize = 10.sp)
                         }
 
                         Button(
                             onClick = { copyToClipboard("JWT Token", account.token) },
-                            shape = RoundedCornerShape(6.dp),
-                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                            shape = RoundedCornerShape(4.dp),
+                            contentPadding = PaddingValues(horizontal = 6.dp, vertical = 0.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
-                            modifier = Modifier.height(30.dp).testTag("copy_jwt_${account.localId}")
+                            modifier = Modifier.height(26.dp).testTag("copy_jwt_${account.localId}")
                         ) {
-                            Icon(Icons.Default.Security, contentDescription = null, modifier = Modifier.size(12.dp))
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text("JWT Token", fontSize = 11.sp)
+                            Icon(Icons.Default.Security, contentDescription = null, modifier = Modifier.size(10.dp))
+                            Spacer(modifier = Modifier.width(3.dp))
+                            Text("JWT Token", fontSize = 10.sp)
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
 
-                    // Operation controls edit / delete / api-refresh
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -953,7 +922,7 @@ fun GuestAccountListItem(
                     ) {
                         val dateForm = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
                         val expStr = if (account.expiresAt <= 0) "Mãi mãi" else dateForm.format(Date(account.expiresAt))
-                        
+
                         Text(
                             text = "Hết hạn: $expStr",
                             fontSize = 11.sp,
@@ -963,24 +932,24 @@ fun GuestAccountListItem(
                         Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                             FilledIconButton(
                                 onClick = onEdit,
-                                modifier = Modifier.size(32.dp),
+                                modifier = Modifier.size(26.dp),
                                 colors = IconButtonDefaults.filledIconButtonColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
                             ) {
-                                Icon(Icons.Default.Edit, contentDescription = "Edit groups", modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onTertiaryContainer)
+                                Icon(Icons.Default.Edit, contentDescription = "Edit groups", modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onTertiaryContainer)
                             }
                             FilledIconButton(
                                 onClick = onRefresh,
-                                modifier = Modifier.size(32.dp),
+                                modifier = Modifier.size(26.dp),
                                 colors = IconButtonDefaults.filledIconButtonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
                             ) {
-                                Icon(Icons.Default.Refresh, contentDescription = "Refresh API", modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSecondaryContainer)
+                                Icon(Icons.Default.Refresh, contentDescription = "Refresh API", modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSecondaryContainer)
                             }
                             FilledIconButton(
                                 onClick = onDelete,
-                                modifier = Modifier.size(32.dp),
+                                modifier = Modifier.size(26.dp),
                                 colors = IconButtonDefaults.filledIconButtonColors(containerColor = MaterialTheme.colorScheme.errorContainer)
                             ) {
-                                Icon(Icons.Default.Delete, contentDescription = "Delete", modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onErrorContainer)
+                                Icon(Icons.Default.Delete, contentDescription = "Delete", modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onErrorContainer)
                             }
                         }
                     }
@@ -1006,44 +975,44 @@ fun LoadingSkeletonItem() {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 6.dp),
+            .padding(horizontal = 16.dp, vertical = 4.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f))
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(14.dp),
+                .padding(10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
                 modifier = Modifier
-                    .size(46.dp)
+                    .size(36.dp)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.onSurface.copy(alpha = alpha * 0.15f))
             )
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(10.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth(0.4f)
-                        .height(16.dp)
+                        .height(14.dp)
                         .clip(RoundedCornerShape(4.dp))
                         .background(MaterialTheme.colorScheme.onSurface.copy(alpha = alpha * 0.15f))
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(6.dp))
                 Box(
                     modifier = Modifier
                         .fillMaxWidth(0.7f)
-                        .height(12.dp)
+                        .height(10.dp)
                         .clip(RoundedCornerShape(4.dp))
                         .background(MaterialTheme.colorScheme.onSurface.copy(alpha = alpha * 0.15f))
                 )
             }
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(10.dp))
             Box(
                 modifier = Modifier
-                    .size(width = 60.dp, height = 24.dp)
-                    .clip(RoundedCornerShape(6.dp))
+                    .size(width = 50.dp, height = 20.dp)
+                    .clip(RoundedCornerShape(4.dp))
                     .background(MaterialTheme.colorScheme.onSurface.copy(alpha = alpha * 0.15f))
             )
         }
