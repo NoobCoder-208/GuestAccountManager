@@ -7,11 +7,11 @@ plugins {
 }
 
 android {
-  namespace = "com.example"
+  namespace = "com.chuong.guestmng"
   compileSdk { version = release(36) { minorApiLevel = 1 } }
 
   defaultConfig {
-    applicationId = "com.aistudio.guestmanager.vfyctq"
+    applicationId = "com.chuong.guestmng"
     minSdk = 24
     targetSdk = 36
     versionCode = 1
