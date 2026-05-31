@@ -1,0 +1,6 @@
+{
+  "name": "GuestManager",
+  "description": "Guest Manager Pro - Optimally manage, filter, sort, and backup your guest accounts with real-time stats and local Room storage.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
