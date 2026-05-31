@@ -1,0 +1,50 @@
+[
+  {
+    "file": "app/src/main/java/com/example/data/repository/GuestRepositoryImpl.kt",
+    "line": 136,
+    "summary": "Massive duplication of parsing logic between parseTokenResponse and parseTokenResponseForRefresh",
+    "failure_scenario": "A change in API schema (e.g., renaming 'access_token') must be manually synchronized across both methods. Missing synchronization will create inconsistent data states where accounts work initially but fail after refresh."
+  },
+  {
+    "file": "app/src/main/java/com/example/data/repository/GuestRepositoryImpl.kt",
+    "line": 61,
+    "summary": "Repository moved from high-level model mapping to low-level string manipulation using org.json.JSONObject",
+    "failure_scenario": "API returning slightly different JSON structure (e.g., nested object) causes JSONException that's caught generically, masking specific parsing failures and making it impossible to distinguish network vs data format errors."
+  },
+  {
+    "file": "app/src/main/java/com/example/data/remote/model/TokenResponse.kt",
+    "line": 7,
+    "summary": "TokenResponse model updated but no longer actually used for parsing - dead code",
+    "failure_scenario": "Future developers spend hours debugging why changes to this model have no effect, not realizing actual parsing is hardcoded in Repository via JSONObject string keys."
+  },
+  {
+    "file": "app/src/main/java/com/example/data/repository/GuestRepositoryImpl.kt",
+    "line": 236,
+    "summary": "Business logic pollution with random data generation in offline fallback",
+    "failure_scenario": "Repository layer now responsible for inventing domain data. Tests become unpredictable due to .random() and mix data retrieval concerns with mock data generation. Broken IOException check could cause silent fake account generation instead of reporting real errors."
+  },
+  {
+    "file": "app/src/main/java/com/example/data/repository/GuestRepositoryImpl.kt",
+    "line": 39,
+    "summary": "Manual error body parsing re-implements Retrofit converter functionality",
+    "failure_scenario": "Server updating error format (e.g., wrapping in 'details' object) causes parser to fail and return raw JSON instead of user-friendly messages, degrading UX."
+  },
+  {
+    "file": "app/src/main/java/com/example/data/repository/GuestRepositoryImpl.kt",
+    "line": 124,
+    "summary": "Arithmetic overflow risk with heuristic for expires_at conversion",
+    "failure_scenario": "Server returning large future timestamp in seconds that exceeds 9999999999L threshold would be incorrectly treated as milliseconds, causing overflow. Or small millisecond timestamp incorrectly converted to seconds."
+  },
+  {
+    "file": "app/src/main/java/com/example/repository/GuestRepositoryImpl.kt",
+    "line": 175,
+    "summary": "Fragile uid fallback logic masks API response issues",
+    "failure_scenario": "Server returns successful token but null uid due to bug - app silently accepts uidInput. Later refresh with real uid creates duplicate records or fails to match session correctly."
+  },
+  {
+    "file": "app/src/main/java/com/example/data/repository/GuestRepositoryImpl.kt",
+    "line": 256,
+    "summary": "Offline fallback limited to IOException misses other connectivity issues",
+    "failure_scenario": "User encounters 'No Route to Host' error wrapped into different exception type, loses elegant offline fallback and gets hard error UI instead of simulated guest account."
+  }
+]
