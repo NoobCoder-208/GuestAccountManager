@@ -19,3 +19,5 @@ debug.keystore
 *.apk
 .build-outputs/
 chuong.jks
+debug.keystore.base64
+*.base64
