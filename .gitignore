@@ -18,3 +18,4 @@ local.properties
 debug.keystore
 *.apk
 .build-outputs/
+chuong.jks
