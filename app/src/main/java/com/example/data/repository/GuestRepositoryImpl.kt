@@ -36,6 +36,206 @@ class GuestRepositoryImpl(
         }
     }
 
+    private fun tryParseErrorBody(e: Exception): String? {
+        if (e is retrofit2.HttpException) {
+            val errorBody = e.response()?.errorBody()?.string()
+            if (!errorBody.isNullOrBlank()) {
+                try {
+                    val json = org.json.JSONObject(errorBody)
+                    if (json.has("error")) {
+                        return json.getString("error")
+                    }
+                    if (json.has("message")) {
+                        return json.getString("message")
+                    }
+                    return errorBody
+                } catch (jsonEx: Exception) {
+                    return errorBody
+                }
+            }
+        }
+        return null
+    }
+
+    private suspend fun parseTokenResponse(
+        rawBody: String,
+        uidInput: String,
+        passwordInput: String,
+        selectedGroups: Set<String>,
+        note: String
+    ): Result<GuestAccount> {
+        try {
+            val json = org.json.JSONObject(rawBody)
+            
+            // Check for explicit error field
+            if (json.has("error")) {
+                val errorVal = json.optString("error")
+                if (!errorVal.isNullOrBlank()) {
+                    return Result.failure(Exception(errorVal))
+                }
+            }
+            
+            // Check if it lacks required token fields -> must be undefined JSON output, show raw
+            val hasToken = json.has("token") || json.has("access_token") || json.has("accessToken")
+            if (!hasToken) {
+                return Result.failure(Exception(rawBody))
+            }
+            
+            val rawUid = if (json.has("uid")) json.get("uid") else uidInput
+            val uidString = when (rawUid) {
+                is Number -> rawUid.toLong().toString()
+                is String -> rawUid
+                else -> rawUid?.toString() ?: uidInput
+            }
+            
+            val nickname = if (json.has("nickname")) json.getString("nickname") else "Guest_${uidInput.takeLast(4)}"
+            val name = if (json.has("name")) json.getString("name") else "Guest User"
+            val level = if (json.has("level")) json.getInt("level") else (10..99).random()
+            val region = if (json.has("region")) json.getString("region") else "VN"
+            
+            val accessToken = when {
+                json.has("access_token") -> json.getString("access_token")
+                json.has("accessToken") -> json.getString("accessToken")
+                else -> UUID.randomUUID().toString().replace("-", "")
+            }
+            
+            val token = if (json.has("token")) json.getString("token") else "JWT_TOKEN_${System.currentTimeMillis()}"
+            
+            val openId = when {
+                json.has("open_id") -> json.getString("open_id")
+                json.has("openId") -> json.getString("openId")
+                else -> "OPEN_ID_${System.currentTimeMillis()}"
+            }
+            
+            val serverUrl = when {
+                json.has("server_url") -> json.getString("server_url")
+                json.has("serverUrl") -> json.getString("serverUrl")
+                else -> "https://server.game.com"
+            }
+            
+            val rawExpires = when {
+                json.has("expires_at") -> json.optDouble("expires_at")
+                json.has("expiresAt") -> json.optDouble("expiresAt")
+                else -> null
+            }
+            
+            val convertedExpiresAt = if (rawExpires != null && !rawExpires.isNaN()) {
+                val sec = rawExpires.toLong()
+                if (sec < 9999999999L) {
+                    sec * 1000L
+                } else {
+                    sec
+                }
+            } else {
+                System.currentTimeMillis() + 86400000L * 15 // default 15 days
+            }
+            
+            val entity = AccountEntity(
+                uidInput = uidInput,
+                passwordInput = passwordInput,
+                uid = uidString,
+                nickname = nickname,
+                name = name,
+                level = level,
+                region = region,
+                accessToken = accessToken,
+                token = token,
+                openId = openId,
+                serverUrl = serverUrl,
+                expiresAt = convertedExpiresAt,
+                createdAt = System.currentTimeMillis(),
+                updatedAt = System.currentTimeMillis(),
+                groupName = selectedGroups.joinToString(","),
+                note = note
+            )
+            val localId = accountDao.insertAccount(entity)
+            return Result.success(entity.copy(localId = localId.toInt()).toDomain())
+        } catch (e: Exception) {
+            return Result.failure(Exception(rawBody.ifBlank { e.localizedMessage ?: "Unknown parsing error" }))
+        }
+    }
+
+    private fun parseTokenResponseForRefresh(rawBody: String, account: AccountEntity): AccountEntity {
+        val json = org.json.JSONObject(rawBody)
+        
+        // Check for explicit error field
+        if (json.has("error")) {
+            val errorVal = json.optString("error")
+            if (!errorVal.isNullOrBlank()) {
+                throw Exception(errorVal)
+            }
+        }
+        
+        // Check if it lacks required token fields
+        val hasToken = json.has("token") || json.has("access_token") || json.has("accessToken")
+        if (!hasToken) {
+            throw Exception(rawBody)
+        }
+        
+        val rawUid = if (json.has("uid")) json.get("uid") else account.uid
+        val uidString = when (rawUid) {
+            is Number -> rawUid.toLong().toString()
+            is String -> rawUid
+            else -> rawUid?.toString() ?: account.uid
+        }
+        
+        val nickname = if (json.has("nickname")) json.getString("nickname") else account.nickname
+        val name = if (json.has("name")) json.getString("name") else account.name
+        val level = if (json.has("level")) json.getInt("level") else account.level
+        val region = if (json.has("region")) json.getString("region") else account.region
+        
+        val accessToken = when {
+            json.has("access_token") -> json.getString("access_token")
+            json.has("accessToken") -> json.getString("accessToken")
+            else -> account.accessToken
+        }
+        
+        val token = if (json.has("token")) json.getString("token") else account.token
+        
+        val openId = when {
+            json.has("open_id") -> json.getString("open_id")
+            json.has("openId") -> json.getString("openId")
+            else -> account.openId
+        }
+        
+        val serverUrl = when {
+            json.has("server_url") -> json.getString("server_url")
+            json.has("serverUrl") -> json.getString("serverUrl")
+            else -> account.serverUrl
+        }
+        
+        val rawExpires = when {
+            json.has("expires_at") -> json.optDouble("expires_at")
+            json.has("expiresAt") -> json.optDouble("expiresAt")
+            else -> null
+        }
+        
+        val convertedExpiresAt = if (rawExpires != null && !rawExpires.isNaN()) {
+            val sec = rawExpires.toLong()
+            if (sec < 9999999999L) {
+                sec * 1000L
+            } else {
+                sec
+            }
+        } else {
+            account.expiresAt
+        }
+        
+        return account.copy(
+            uid = uidString,
+            nickname = nickname,
+            name = name,
+            level = level,
+            region = region,
+            accessToken = accessToken,
+            token = token,
+            openId = openId,
+            serverUrl = serverUrl,
+            expiresAt = convertedExpiresAt,
+            updatedAt = System.currentTimeMillis()
+        )
+    }
+
     override suspend fun addAccount(
         uidInput: String,
         passwordInput: String,
@@ -43,52 +243,41 @@ class GuestRepositoryImpl(
         note: String
     ): Result<GuestAccount> = withContext(Dispatchers.IO) {
         try {
-            val response = guestApi.getToken(uidInput, passwordInput)
-            val expiresAt = response.expiresAt ?: (System.currentTimeMillis() + 86400000L * 15) // default 15 days
-            
-            val entity = AccountEntity(
-                uidInput = uidInput,
-                passwordInput = passwordInput,
-                uid = response.uid ?: uidInput,
-                nickname = response.nickname ?: "Guest_${uidInput.takeLast(4)}",
-                name = response.name ?: "Guest User",
-                level = response.level ?: (10..99).random(),
-                region = response.region ?: "VN",
-                accessToken = response.accessToken ?: UUID.randomUUID().toString().replace("-", ""),
-                token = response.token ?: "JWT_TOKEN_${System.currentTimeMillis()}",
-                openId = response.openId ?: "OPEN_ID_${System.currentTimeMillis()}",
-                serverUrl = response.serverUrl ?: "https://server.game.com",
-                expiresAt = expiresAt,
-                createdAt = System.currentTimeMillis(),
-                updatedAt = System.currentTimeMillis(),
-                groupName = selectedGroups.joinToString(","),
-                note = note
-            )
-            val localId = accountDao.insertAccount(entity)
-            Result.success(entity.copy(localId = localId.toInt()).toDomain())
+            val responseBody = guestApi.getToken(uidInput, passwordInput)
+            val rawBody = responseBody.string()
+            parseTokenResponse(rawBody, uidInput, passwordInput, selectedGroups, note)
         } catch (e: Exception) {
-            // Elegant offline fallback so user can still test the app if api returns 500 or network is down.
-            val generatedNickname = "Guest_${uidInput.takeLast(4)}"
-            val entity = AccountEntity(
-                uidInput = uidInput,
-                passwordInput = passwordInput,
-                uid = uidInput,
-                nickname = generatedNickname,
-                name = "Guest User $uidInput",
-                level = (10..99).random(),
-                region = listOf("VN", "US", "JP", "KR", "SG", "TW").random(),
-                accessToken = UUID.randomUUID().toString().replace("-", ""),
-                token = "jwt.eyJ1aWQiOiIkdWlkSW5wdXQiLCJleHAiOiIrMTVkYXlzIn0." + UUID.randomUUID().toString().take(12),
-                openId = "op_${uidInput}_" + (1000..9999).random(),
-                serverUrl = "https://asia-guest.game-server.com",
-                expiresAt = System.currentTimeMillis() + (86400000L * listOf(2, 5, 10, -1, 30, 0).random()), // Mix of active & expired
-                createdAt = System.currentTimeMillis(),
-                updatedAt = System.currentTimeMillis(),
-                groupName = selectedGroups.joinToString(","),
-                note = if (note.isBlank()) "Offline Fallback" else "$note (Offline Fallback)"
-            )
-            val localId = accountDao.insertAccount(entity)
-            Result.success(entity.copy(localId = localId.toInt()).toDomain())
+            val validationError = tryParseErrorBody(e)
+            if (validationError != null) {
+                return@withContext Result.failure(Exception(validationError))
+            }
+            
+            // Only fallback to offline simulation if the exception is an offline connectivity/IO problem
+            if (e is java.io.IOException) {
+                val generatedNickname = "Guest_${uidInput.takeLast(4)}"
+                val entity = AccountEntity(
+                    uidInput = uidInput,
+                    passwordInput = passwordInput,
+                    uid = uidInput,
+                    nickname = generatedNickname,
+                    name = "Guest User $uidInput",
+                    level = (10..99).random(),
+                    region = listOf("VN", "US", "JP", "KR", "SG", "TW").random(),
+                    accessToken = UUID.randomUUID().toString().replace("-", ""),
+                    token = "jwt.eyJ1aWQiOiIkdWlkSW5wdXQiLCJleHAiOiIrMTVkYXlzIn0." + UUID.randomUUID().toString().take(12),
+                    openId = "op_${uidInput}_" + (1000..9999).random(),
+                    serverUrl = "https://asia-guest.game-server.com",
+                    expiresAt = System.currentTimeMillis() + (86400000L * listOf(2, 5, 10, -1, 30, 0).random()), // Mix of active & expired
+                    createdAt = System.currentTimeMillis(),
+                    updatedAt = System.currentTimeMillis(),
+                    groupName = selectedGroups.joinToString(","),
+                    note = if (note.isBlank()) "Offline Fallback" else "$note (Offline Fallback)"
+                )
+                val localId = accountDao.insertAccount(entity)
+                Result.success(entity.copy(localId = localId.toInt()).toDomain())
+            } else {
+                Result.failure(e)
+            }
         }
     }
 
@@ -125,21 +314,9 @@ class GuestRepositoryImpl(
         for (id in localIds) {
             val account = accountDao.getAccountById(id) ?: continue
             try {
-                val response = guestApi.getToken(account.uidInput, account.passwordInput)
-                val expiresAt = response.expiresAt ?: (System.currentTimeMillis() + 86400000L * 15)
-                val updated = account.copy(
-                    uid = response.uid ?: account.uid,
-                    nickname = response.nickname ?: account.nickname,
-                    name = response.name ?: account.name,
-                    level = response.level ?: account.level,
-                    region = response.region ?: account.region,
-                    accessToken = response.accessToken ?: account.accessToken,
-                    token = response.token ?: account.token,
-                    openId = response.openId ?: account.openId,
-                    serverUrl = response.serverUrl ?: account.serverUrl,
-                    expiresAt = expiresAt,
-                    updatedAt = System.currentTimeMillis()
-                )
+                val responseBody = guestApi.getToken(account.uidInput, account.passwordInput)
+                val rawBody = responseBody.string()
+                val updated = parseTokenResponseForRefresh(rawBody, account)
                 accountDao.updateAccount(updated)
                 successCount++
             } catch (e: Exception) {
